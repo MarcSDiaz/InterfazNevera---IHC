@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Smart Fridge UI</title>
+
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#1b1b1b; /* fondo exterior */
+    font-family:'Segoe UI', sans-serif;
+}
+
+/* Marco de la pantalla */
+.device{
+    width:420px;
+    height:700px;
+    background:#0f2a36;
+    border-radius:30px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.6);
+    overflow:hidden;
+    position:relative;
+    border:8px solid #111; /* marco */
+}
+
+/* Barra superior */
+header{
+    background:#0b1f28;
+    color:white;
+    text-align:center;
+    padding:15px;
+    font-size:16px;
+}
+
+/* Pantallas */
+.screen{
+    position:absolute;
+    width:100%;
+    height:calc(100% - 55px);
+    top:55px;
+    padding:20px;
+    box-sizing:border-box;
+    display:none;
+    color:white;
+    overflow-y:auto;
+    animation:fade 0.3s ease-in-out;
+}
+
+.active{
+    display:block;
+}
+
+@keyframes fade{
+    from{opacity:0;}
+    to{opacity:1;}
+}
+
+.grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:15px;
+}
+
+.tile{
+    height:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    border-radius:15px;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.tile:hover{
+    transform:scale(1.05);
+}
+
+.blue{ background:#4aa3df; }
+.green{ background:#2ecc71; }
+.purple{ background:#9b59b6; }
+.orange{ background:#f39c12; }
+.red{ background:#e74c3c; }
+.teal{ background:#1abc9c; }
+
+.back{
+    cursor:pointer;
+    font-size:13px;
+    opacity:0.8;
+    margin-bottom:10px;
+}
+
+.card{
+    background:#123947;
+    padding:15px;
+    border-radius:12px;
+    margin-top:15px;
+}
+
+.card1{
+    background:#123947;
+    padding:15px;
+    border-radius:12px;
+    margin-top:15px;
+}
+
+
+input, select{
+    width:100%;
+    padding:8px;
+    margin-top:8px;
+    border:none;
+    border-radius:10px;
+}
+
+button{
+    margin-top:10px;
+    padding:8px;
+    width:100%;
+    border:none;
+    border-radius:6px;
+    background:#1abc9c;
+    color:white;
+    cursor:pointer;
+}
+
+</style>
+</head>
+<body>
+
+<div class="device">
+
+<header>🧊 SMART REFRIGERATOR</header>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+    <div class="grid">
+        <div class="tile blue" onclick="openScreen('inventario')"><br>INVENTARIO</div>
+        <div class="tile green" onclick="openScreen('temperatura')"><br>TEMPERATURA</div>
+        <div class="tile purple" onclick="openScreen('peso')"><br>PESO</div>
+        <div class="tile orange" onclick="openScreen('estadisticas')"><br>CONSUMO</div>
+        <div class="tile red" onclick="openScreen('notificaciones')"><br>ALERTAS</div>
+        <div class="tile teal" onclick="openScreen('nutricion')"><br>NUTRICION</div>
+
+        <!-- BOTÓN MODO AHORRO (ocupa 2 columnas) -->
+        <div class="tile" 
+             onclick="openScreen('ahorro')" 
+             style="grid-column: span 2; background:#34495e; font-weight:bold;">
+            <br>MODO AHORRO
+        </div>
+    </div>
+</div>
+
+<!-- INVENTARIO -->
+<div id="inventario" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3>Inventario</h3>
+
+    <div class="card">
+        <strong>Registrar Movimiento</strong><br><br>
+
+        <input type="text" placeholder="Nombre">
+        <input type="number" placeholder="Peso (kg)">
+        <input type="date">
+
+        <br>
+
+        <!-- Botones debajo de los inputs -->
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button style="flex:1; background:#2ecc71; color:white; border:none; padding:10px; border-radius:6px;">
+                Registrar Entrada
+            </button>
+
+            <button style="flex:1; background:#e74c3c; color:white; border:none; padding:10px; border-radius:6px;">
+                Registrar Salida
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <strong>Lista</strong>
+        <p>Leche - 2kg</p>
+        <p>Carne - 1kg</p>
+        <p>Huevos - 2kg</p>
+        <p>Tomate - 1.5kg</p>
+        <p>Gaseosa - 1Lt</p>
+        <p>Yogurt - 500ml</p>
+    </div>
+</div>
+
+<!-- TEMPERATURA -->
+<div id="temperatura" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3>Temperatura</h3>
+
+    <div id="tempCard" class="card" style="border-left:6px solid #3498db;">
+        
+        <strong>🌡 Temperatura actual:</strong> 
+        <span id="tempValue" style="font-size:18px; color:#3498db;">4°C</span>
+
+        <input 
+            type="range" 
+            min="-5" 
+            max="10"
+            value="4"
+            oninput="updateTemp(this.value)"
+        >
+
+        <button id="tempBtn" style="background:#3498db;">
+            Ajustar
+        </button>
+
+    </div>
+</div>
+
+<!-- PESO -->
+<div id="peso" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3>Gestión de Peso</h3>
+
+    <!-- Resumen General -->
+    <div class="card">
+        <strong>Capacidad de Almacenamiento</strong><br><br>
+        Capacidad Máxima: 30 kg<br>
+        Peso Actual: 15 kg<br>
+        Ocupación: 50%
+        
+        <!-- Barra de progreso -->
+        <div style="background:#0d2d38; border-radius:8px; margin-top:10px; height:18px;">
+            <div style="width:50%; height:100%; background:#1abc9c; border-radius:8px;"></div>
+        </div>
+    </div>
+
+    <!-- Peso por Categoría -->
+    <div class="card">
+        <strong>Peso por Categoría</strong><br><br>
+        Carnes: 5 kg<br>
+        Lácteos: 3 kg<br>
+        Verduras: 4 kg<br>
+        Otros: 3 kg
+    </div>
+
+</div>
+
+<!-- ESTADISTICAS -->
+<div id="estadisticas" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3>Estadísticas de Consumo</h3>
+
+    <!-- Ranking Principal -->
+    <div class="card">
+        <strong>Alimentos Más Consumidos (Mes)</strong><br><br>
+        1. Leche - 8 kg<br>
+        2. Carne - 6 kg<br>
+        3. Huevos - 4 kg<br>
+        4. Verduras - 3 kg<br>
+        5. Jugos - 2 kg
+    </div>
+
+    <!-- Consumo Semanal -->
+    <div class="card">
+        <strong>Consumo Últimos 7 Días</strong><br><br>
+        Total consumido: 5 kg<br>
+        Producto más retirado: Leche<br>
+        Variación respecto a la semana pasada: +1.2 kg 
+    </div>
+
+    <!-- Consumo por Categoría -->
+    <div class="card">
+        <strong> Consumo por Categoría</strong><br><br>
+        Carnes: 40%<br>
+        Lácteos: 30%<br>
+        Verduras: 20%<br>
+        Otros: 10%
+    </div>
+</div>
+
+<!-- NOTIFICACIONES -->
+<div id="notificaciones" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3>Centro de Alertas</h3>
+
+    <!-- PRODUCTOS BAJOS (AMARILLO = Atención Media) -->
+    <div class="card" style="background:#5a4a00; border-left:6px solid #f1c40f;">
+        <strong>Productos con Nivel Bajo</strong><br><br>
+        Leche - 0.3 kg restantes<br>
+        Huevos - 2 unidades<br>
+        Mantequilla - 0.1 kg<br>
+        Jugo de naranja - 0.5 L<br>
+    </div>
+
+    <!-- PROXIMOS A VENCER (AMARILLO MÁS SUAVE) -->
+    <div class="card" style="background:#5c5200; border-left:6px solid #f39c12;">
+        <strong>Próximos a Vencer (3 días)</strong><br><br>
+        Carne molida - Vence: 05/03/2026<br>
+        Queso fresco - Vence: 06/03/2026<br>
+        Espinaca - Vence: 04/03/2026<br>
+    </div>
+
+    <!-- PRODUCTOS VENCIDOS (ROJO = CRÍTICO) -->
+    <div class="card" style="background:#4a1c1c; border-left:6px solid #e74c3c;">
+        <strong>Productos Vencidos</strong><br><br>
+        Yogurt natural - Venció: 01/03/2026<br>
+    </div>
+
+    <!-- REGISTRO DE ACCESO -->
+    <div class="card" style="background:#0f3a2f; border-left:6px solid #2ecc71;">
+        <strong>Registro de Acceso</strong><br><br>
+        <span style="color:#2ecc71;">Acceso correcto - 20:15</span><br>
+        <span style="color:#e74c3c;">Intento fallido - 18:42</span><br>
+    </div>
+</div>
+
+<!-- NUTRICION -->
+<div id="nutricion" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3 style="color:#1abc9c;">Panel Nutricional</h3>
+
+    <!-- Resumen General -->
+    <div class="card" style="border-left:6px solid #1abc9c;">
+        <strong style="color:#f39c12;">Disponibilidad Nutricional Total</strong><br><br>
+        Calorías disponibles: <span style="color:#f39c12;">2200 kcal</span><br>
+        Proteínas: <span style="color:#3498db;">130 g</span><br>
+        Carbohidratos: <span style="color:#2ecc71;">250 g</span><br>
+        Grasas: <span style="color:#e74c3c;">90 g</span><br>
+        Fibra: <span style="color:#9b59b6;">35 g</span>
+    </div>
+
+    <!-- Grafica Circular -->
+    <div class="card" style="text-align:center;">
+        <strong>Distribución Nutricional</strong><br><br>
+
+        <div style="
+            width:160px;
+            height:160px;
+            margin:auto;
+            border-radius:50%;
+            background: conic-gradient(
+                #3498db 0% 30%,     /* Proteínas */
+                #2ecc71 30% 75%,    /* Carbohidratos */
+                #e74c3c 75% 100%    /* Grasas */
+            );
+            position:relative;
+        ">
+            <div style="
+                width:90px;
+                height:90px;
+                background:#0f2a36;
+                border-radius:50%;
+                position:absolute;
+                top:50%;
+                left:50%;
+                transform:translate(-50%,-50%);
+            "></div>
+        </div>
+
+        <div style="margin-top:15px; font-size:14px;">
+            <span style="color:#3498db;">● Proteínas 30%</span><br>
+            <span style="color:#2ecc71;">● Carbohidratos 45%</span><br>
+            <span style="color:#e74c3c;">● Grasas 25%</span>
+        </div>
+    </div>
+
+    <!-- Recomendación Inteligente -->
+    <div class="card" style="border-left:6px solid #9b59b6;">
+        <strong style="color:#9b59b6;">Recomendación del Sistema</strong><br><br>
+        Nivel alto de proteínas disponible.<br>
+        Se recomienda consumir más verduras para balancear la dieta.
+    </div>
+</div>
+
+<!-- MODO AHORRO -->
+<div id="ahorro" class="screen">
+    <div class="back" onclick="openScreen('home')">VOLVER</div>
+    <h3>Modo Ahorro Energético</h3>
+
+    <!-- Programación por fechas -->
+    <div class="card">
+        <strong>Programar Activación</strong><br><br>
+        Fecha Inicio:
+        <input type="date">
+        Fecha Fin:
+        <input type="date">
+    </div>
+
+    <!-- Ajuste automático -->
+    <div class="card">
+        <strong>Ajuste Automático de Temperatura</strong><br><br>
+        Temperatura actual normal: 4°C<br>
+        Temperatura en modo ahorro: 7°C<br>
+        <input type="range" min="5" max="10">
+    </div>
+
+    <!-- Opciones adicionales -->
+    <div class="card1">
+        <strong>Opciones de Optimización</strong><br>
+        <label><input type="checkbox" style="width: auto;"> Reducir potencia</label><br>
+        <label><input type="checkbox" style="width: auto;"> Desactivar luz automática</label><br>
+        <label><input type="checkbox" style="width: auto;"> Silenciar notificaciones</label>
+    </div>
+
+    <!-- Activación -->
+    <div class="card">
+        <button style="background:#27ae60;">ACTIVAR MODO AHORRO</button>
+    </div>
+</div>
+
+</div>
+
+
+<script>
+function openScreen(id){
+    document.querySelectorAll('.screen').forEach(screen=>{
+        screen.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+}
+</script>
+
+<script>
+function updateTemp(value){
+    const tempText = document.getElementById("tempValue");
+    const tempCard = document.getElementById("tempCard");
+    const tempBtn = document.getElementById("tempBtn");
+
+    tempText.innerText = value + "°C";
+
+    if(value <= 3){
+        tempText.style.color = "#3498db";
+        tempCard.style.borderLeft = "6px solid #3498db";
+        tempBtn.style.background = "#3498db";
+    }
+    else if(value <= 7){
+        tempText.style.color = "#2ecc71";
+        tempCard.style.borderLeft = "6px solid #2ecc71";
+        tempBtn.style.background = "#2ecc71";
+    }
+    else{
+        tempText.style.color = "#e74c3c";
+        tempCard.style.borderLeft = "6px solid #e74c3c";
+        tempBtn.style.background = "#e74c3c";
+    }
+}
+</script>
+
+</body>
+</html>
